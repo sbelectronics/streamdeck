@@ -6,8 +6,8 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
+	"github.com/sbelectronics/streamdeck/pkg/globaloptions"
 	"github.com/sbelectronics/streamdeck/pkg/platform/windows"
 	"github.com/sbelectronics/streamdeck/pkg/streamdeck"
 	"io/ioutil"
@@ -20,46 +20,6 @@ import (
 type Pattern struct {
 	Regex   string
 	Profile string
-}
-
-var (
-	GlobalOptions struct {
-		Port          int
-		PluginUUID    string
-		RegisterEvent string
-		Info          string
-		Verbose       bool
-
-		DeviceName string
-		DeviceId   string
-	}
-
-	forceVerbose = false
-)
-
-func parseCmdline() {
-	log.Printf("Loading command line")
-
-	help := fmt.Sprintf("Port number for websocket")
-	flag.IntVar(&(GlobalOptions.Port), "port", 0, help)
-
-	help = fmt.Sprintf("Plugin UUID")
-	flag.StringVar(&(GlobalOptions.PluginUUID), "pluginUUID", "", help)
-
-	help = fmt.Sprintf("Register Event")
-	flag.StringVar(&(GlobalOptions.RegisterEvent), "registerEvent", "", help)
-
-	help = fmt.Sprintf("Info")
-	flag.StringVar(&(GlobalOptions.Info), "info", "", help)
-
-	help = fmt.Sprintf("Verbose mode")
-	flag.BoolVar(&(GlobalOptions.Verbose), "v", false, help)
-
-	flag.Parse()
-
-	if forceVerbose {
-		GlobalOptions.Verbose = true
-	}
 }
 
 func loadPatterns() ([]Pattern, error) {
@@ -91,10 +51,10 @@ func main() {
 		}
 		defer logf.Close()
 		log.SetOutput(logf)
-		forceVerbose = true
+		globaloptions.ForceVerbose = true
 	}
 
-	parseCmdline()
+	globaloptions.ParseCmdline()
 
 	patterns, err := loadPatterns()
 	if err != nil {
@@ -102,11 +62,11 @@ func main() {
 	}
 
 	sd := streamdeck.StreamDeck{}
-	err = sd.Init(GlobalOptions.Port,
-		GlobalOptions.PluginUUID,
-		GlobalOptions.RegisterEvent,
-		GlobalOptions.Info,
-		GlobalOptions.Verbose)
+	err = sd.Init(globaloptions.Port,
+		globaloptions.PluginUUID,
+		globaloptions.RegisterEvent,
+		globaloptions.Info,
+		globaloptions.Verbose)
 	if err != nil {
 		log.Fatalf("Error initializing streamdeck plugin %v", err)
 	}
@@ -126,7 +86,7 @@ func main() {
 		}
 
 		if lastTitle != title {
-			if GlobalOptions.Verbose {
+			if globaloptions.Verbose {
 				log.Printf("Title: %s", title)
 			}
 
@@ -135,7 +95,7 @@ func main() {
 			matchedSomething := false
 			for _, p := range patterns {
 				if matched, _ := regexp.MatchString(p.Regex, title); matched {
-					if GlobalOptions.Verbose {
+					if globaloptions.Verbose {
 						log.Printf("Matched %v", p)
 					}
 					sd.SwitchProfileIfChanged(p.Profile)

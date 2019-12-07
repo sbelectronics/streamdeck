@@ -13,12 +13,11 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"github.com/sbelectronics/streamdeck/pkg/streamdeck"
-	//"io/ioutil"
 	"bytes"
+	"fmt"
 	"github.com/BurntSushi/graphics-go/graphics"
+	"github.com/sbelectronics/streamdeck/pkg/globaloptions"
+	"github.com/sbelectronics/streamdeck/pkg/streamdeck"
 	"image"
 	"image/color"
 	"image/draw"
@@ -29,10 +28,17 @@ import (
 	"time"
 )
 
+var (
+	color_presets []color.RGBA = []color.RGBA{color.RGBA{200, 0, 0, 255},
+		color.RGBA{0, 200, 0, 255},
+		color.RGBA{0, 0, 200, 255}}
+)
+
 type MyButtonHandler struct {
 	color int
 }
 
+// On every keyup, change the color
 func (mbh *MyButtonHandler) OnKeyUp(*streamdeck.Button) {
 	mbh.color++
 	if mbh.color >= 3 {
@@ -41,50 +47,6 @@ func (mbh *MyButtonHandler) OnKeyUp(*streamdeck.Button) {
 
 }
 func (mbh *MyButtonHandler) OnKeyDown(*streamdeck.Button) {}
-
-var (
-	GlobalOptions struct {
-		Port          int
-		PluginUUID    string
-		RegisterEvent string
-		Info          string
-		Verbose       bool
-
-		DeviceName string
-		DeviceId   string
-	}
-
-	forceVerbose = false
-
-	color_presets []color.RGBA = []color.RGBA{color.RGBA{200, 0, 0, 255},
-		color.RGBA{0, 200, 0, 255},
-		color.RGBA{0, 0, 200, 255}}
-)
-
-func parseCmdline() {
-	log.Printf("Loading command line")
-
-	help := fmt.Sprintf("Port number for websocket")
-	flag.IntVar(&(GlobalOptions.Port), "port", 0, help)
-
-	help = fmt.Sprintf("Plugin UUID")
-	flag.StringVar(&(GlobalOptions.PluginUUID), "pluginUUID", "", help)
-
-	help = fmt.Sprintf("Register Event")
-	flag.StringVar(&(GlobalOptions.RegisterEvent), "registerEvent", "", help)
-
-	help = fmt.Sprintf("Info")
-	flag.StringVar(&(GlobalOptions.Info), "info", "", help)
-
-	help = fmt.Sprintf("Verbose mode")
-	flag.BoolVar(&(GlobalOptions.Verbose), "v", false, help)
-
-	flag.Parse()
-
-	if forceVerbose {
-		GlobalOptions.Verbose = true
-	}
-}
 
 func main() {
 	// Create the file c:\junk\demo_plugin.log and we will append
@@ -96,17 +58,17 @@ func main() {
 		}
 		defer logf.Close()
 		log.SetOutput(logf)
-		forceVerbose = true
+		globaloptions.ForceVerbose = true
 	}
 
-	parseCmdline()
+	globaloptions.ParseCmdline()
 
 	sd := streamdeck.StreamDeck{}
-	err := sd.Init(GlobalOptions.Port,
-		GlobalOptions.PluginUUID,
-		GlobalOptions.RegisterEvent,
-		GlobalOptions.Info,
-		GlobalOptions.Verbose)
+	err := sd.Init(globaloptions.Port,
+		globaloptions.PluginUUID,
+		globaloptions.RegisterEvent,
+		globaloptions.Info,
+		globaloptions.Verbose)
 	if err != nil {
 		log.Fatalf("Error initializing streamdeck plugin %v", err)
 	}
