@@ -2,6 +2,8 @@
 Copyright Scott M Baker
 http://www.smbaker.com/
 
+| Note: All of these plugins only work with Windows. I'm a Windows (and Linux) user, not a Mac user. Sorry, Mac peoples.
+
 This is a collection of plugins that I wrote for my Elgato Stream Deck. They are as-is without any warranty.
 
 * binclock - binary (actually more BCD than binary, but that is the trend) clock
