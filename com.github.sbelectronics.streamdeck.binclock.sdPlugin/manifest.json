@@ -16,7 +16,7 @@
       }
     ], 
     "SDKVersion": 2,
-    "Author": "smbaker", 
+    "Author": "Scott M Baker", 
     "CodePathWin": "binclock.exe", 
     "Description": "Binary/BCD Clock.", 
     "Name": "binclock", 

@@ -16,7 +16,7 @@
       }
     ], 
     "SDKVersion": 2,
-    "Author": "smbaker", 
+    "Author": "Scott M Baker", 
     "CodePathWin": "profile_switcher.exe", 
     "Description": "Advanced Profile Switcher.", 
     "Name": "profileswitcher", 

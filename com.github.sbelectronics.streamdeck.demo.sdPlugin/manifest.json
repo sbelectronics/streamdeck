@@ -16,7 +16,7 @@
       }
     ], 
     "SDKVersion": 2,
-    "Author": "smbaker", 
+    "Author": "Scott M Baker", 
     "CodePathWin": "demo.exe", 
     "Description": "Golang plugin demo.", 
     "Name": "golang-demo", 
