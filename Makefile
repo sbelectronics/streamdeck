@@ -29,5 +29,18 @@ install:
 	xcopy /h /k /e /c /y /i $(DEMO_DIR) $(APPDATA)\Elgato\StreamDeck\Plugins\$(DEMO_DIR)
 	xcopy /h /k /e /c /y /i $(PROFILE_SWITCHER_DIR) $(APPDATA)\Elgato\StreamDeck\Plugins\$(PROFILE_SWITCHER_DIR)
 
+distrib:
+	rm Release/*.streamdeckPlugin
+	DistributionTool -b -i $(BINCLOCK_DIR) -o Release || echo
+	DistributionTool -b -i $(DEMO_DIR) -o Release || echo
+
+supersize:
+	convert $(BINCLOCK_DIR)/pluginIcon.png -resize 144x144 $(BINCLOCK_DIR)/pluginIcon@2x.png
+	convert $(BINCLOCK_DIR)/icon.png -resize 40x40 $(BINCLOCK_DIR)/icon@2x.png
+	convert $(BINCLOCK_DIR)/defaultImage.png -resize 144x144 $(BINCLOCK_DIR)/defaultImage@2x.png
+	convert $(DEMO_DIR)/pluginIcon.png -resize 144x144 $(DEMO_DIR)/pluginIcon@2x.png
+	convert $(DEMO_DIR)/icon.png -resize 40x40 $(DEMO_DIR)/icon@2x.png
+	convert $(DEMO_DIR)/defaultImage.png -resize 144x144 $(DEMO_DIR)/defaultImage@2x.png
+
 clean:
 	rm $(PROFILE_SWITCHER_EXE) $(DEMO_EXE) $(BINCLOCK_EXE)
