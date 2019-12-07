@@ -1,0 +1,88 @@
+{
+    "Actions": [
+      {
+        "Icon": "icon", 
+        "Name": "ProfileSwitcher", 
+        "States": [
+          {
+            "Image": "defaultImage",
+            "TitleAlignment": "middle", 
+            "FontSize": "17"
+          }
+        ], 
+        "SupportedInMultiActions": false,
+        "Tooltip": "Profile switcher", 
+        "UUID": "com.github.sbelectronics.streamdeck.profileswitcher"
+      }
+    ], 
+    "SDKVersion": 2,
+    "Author": "smbaker", 
+    "CodePathWin": "profile_switcher.exe", 
+    "Description": "Advanced Profile Switcher.", 
+    "Name": "profileswitcher", 
+    "Icon": "pluginIcon", 
+    "URL": "https://www.github.com/sbelectronics/streamdeck", 
+    "Version": "1.0",
+    "OS": [
+      {
+          "Platform": "windows", 
+          "MinimumVersion" : "10"
+      }
+    ],
+    "Software": 
+      {
+          "MinimumVersion" : "4.1"
+      },
+    "Profiles": [
+      {
+        "Name": "profileswitcher1", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher2", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher3", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher4", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher5", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher6", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher7", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher8", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher9", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      },
+      {
+        "Name": "profileswitcher10", 
+        "ReadOnly": true,
+        "DeviceType": 0
+      }
+    ]
+}

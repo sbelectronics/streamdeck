@@ -1,0 +1,36 @@
+{
+    "Actions": [
+      {
+        "Icon": "icon", 
+        "Name": "golang-demo", 
+        "States": [
+          {
+            "Image": "defaultImage",
+            "TitleAlignment": "middle", 
+            "FontSize": "17"
+          }
+        ], 
+        "SupportedInMultiActions": false,
+        "Tooltip": "Golang Demo", 
+        "UUID": "com.github.sbelectronics.streamdeck.demo"
+      }
+    ], 
+    "SDKVersion": 2,
+    "Author": "smbaker", 
+    "CodePathWin": "demo.exe", 
+    "Description": "Golang plugin demo.", 
+    "Name": "golang-demo", 
+    "Icon": "pluginIcon", 
+    "URL": "https://www.github.com/sbelectronics/streamdeck", 
+    "Version": "1.0",
+    "OS": [
+      {
+          "Platform": "windows", 
+          "MinimumVersion" : "10"
+      }
+    ],
+    "Software": 
+      {
+          "MinimumVersion" : "4.1"
+      }
+}
