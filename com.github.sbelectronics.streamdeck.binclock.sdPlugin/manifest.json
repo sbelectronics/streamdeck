@@ -1,0 +1,36 @@
+{
+    "Actions": [
+      {
+        "Icon": "icon", 
+        "Name": "binclock", 
+        "States": [
+          {
+            "Image": "defaultImage",
+            "TitleAlignment": "middle", 
+            "FontSize": "17"
+          }
+        ], 
+        "SupportedInMultiActions": false,
+        "Tooltip": "BinaryClock", 
+        "UUID": "com.github.sbelectronics.streamdeck.binclock"
+      }
+    ], 
+    "SDKVersion": 2,
+    "Author": "smbaker", 
+    "CodePathWin": "binclock.exe", 
+    "Description": "Binary/BCD Clock.", 
+    "Name": "binclock", 
+    "Icon": "pluginIcon", 
+    "URL": "https://www.github.com/sbelectronics/streamdeck", 
+    "Version": "1.0",
+    "OS": [
+      {
+          "Platform": "windows", 
+          "MinimumVersion" : "10"
+      }
+    ],
+    "Software": 
+      {
+          "MinimumVersion" : "4.1"
+      }
+}
