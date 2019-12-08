@@ -44,3 +44,6 @@ supersize:
 
 clean:
 	rm $(PROFILE_SWITCHER_EXE) $(DEMO_EXE) $(BINCLOCK_EXE)
+
+test:
+	go test ./...
