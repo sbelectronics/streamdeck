@@ -105,6 +105,11 @@ func (sd *StreamDeck) Errorf(fmt string, args ...interface{}) {
 	log.Printf(fmt, args...)
 }
 
+func (sd *StreamDeck) Fatalf(fmt string, args ...interface{}) {
+	// this will cause an os.exit()
+	log.Fatalf(fmt, args...)
+}
+
 // Extract the device id from the Info JSON
 func (sd *StreamDeck) decodeInfo() error {
 	var f interface{}
@@ -321,7 +326,8 @@ func (sd *StreamDeck) processWebsocketIncoming() {
 		_, message, err := sd.ws.ReadMessage()
 		if err != nil {
 			sd.Errorf("Read error: %v", err)
-			return
+			sd.Fatalf("FATAL: Websocket has failed -- exiting plugin")
+			return // this will probably not be executed
 		}
 
 		sd.Debugf("Websocket Receive: %s", message)

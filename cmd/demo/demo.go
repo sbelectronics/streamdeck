@@ -84,12 +84,6 @@ func main() {
 	angle := math.Pi * 0.01
 	for {
 		for context, button := range sd.Buttons {
-			// If there's no handler, then attach a handler
-			/*			if button.Handler == nil {
-						log.Printf("Set handler")
-						button.Handler = &MyButtonHandler{}
-					}*/
-
 			// Draw a colored box and rotate it
 			thisColor := color_presets[button.Handler.(*MyButtonHandler).color]
 			img := image.NewRGBA(image.Rect(0, 0, 72, 72))

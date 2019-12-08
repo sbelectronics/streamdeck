@@ -65,14 +65,22 @@ func main() {
 		BackColor:     binclock.DEFAULT_BACK_COLOR}
 	bc.Create()
 
+	lastSecond := -1
 	for {
+		// only update if the second has changed
+		tNow := time.Now()
+		if tNow.Second() == lastSecond {
+			continue
+		}
+		lastSecond = tNow.Second()
+
 		for context, button := range sd.Buttons {
 			// override the colors with what might have come from the property inspector
 			bc.LitDotColor = util.StringMapGetDefault(button.Settings, "colorlit", binclock.DEFAULT_LIT_COLOR)
 			bc.UnlitDotColor = util.StringMapGetDefault(button.Settings, "colorunlit", binclock.DEFAULT_UNLIT_COLOR)
 			bc.BackColor = util.StringMapGetDefault(button.Settings, "colorback", binclock.DEFAULT_BACK_COLOR)
 
-			bc.DrawTime(time.Now())
+			bc.DrawTime(tNow)
 
 			// Encode the image into a png and set it on the StreamDeck
 			buf := new(bytes.Buffer)
@@ -86,6 +94,6 @@ func main() {
 			}
 		}
 
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(100 * time.Millisecond)
 	}
 }
