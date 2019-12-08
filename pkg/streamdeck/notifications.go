@@ -1,3 +1,9 @@
+/* messages.go
+   (c) Scott M Baker, http://www.smbaker.com/
+
+   JSON message structures, sent from Streamdeck to Plugin.
+*/
+
 package streamdeck
 
 type NotificationHeader struct {

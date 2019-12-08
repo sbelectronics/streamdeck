@@ -14,6 +14,8 @@ This is a collection of plugins that I wrote for my Elgato Stream Deck. They are
 
 This one is relatively straightforward, just drag it onto your button bar and it will start displaying the clock.
 
+Windows Download: https://github.com/sbelectronics/streamdeck/blob/master/Release/com.github.sbelectronics.streamdeck.binclock.streamDeckPlugin?raw=true
+
 ## demo
 
 This one displays a rotating box with a counter. Push the button and the color of the box will change.
@@ -41,3 +43,17 @@ When you open a window that matches the Regex defined in `patterns.json`, Stream
 As I said, complicated, but not quite as complicated as it sounds once you get the hang of it.
 
 | Note: ElGato developers if you ever happen across this README, please add the ability to call `switchToProfile` on profiles that don't belong to the current plugin. It would have made life way simpler.
+
+## Building
+
+Although I'm a Linux developer by trade, this software was written and developed in a Windows environment. I installed the following three toolsets:
+
+* git: https://git-scm.com/download/win, version 2.24.0.2
+* go: https://golang.org/dl/, version 1.12.14, 32-bit
+* gcc and related: http://win-builds.org/doku.php/download_and_installation_from_windows, version 1.5.0, 32-bit (i686)
+
+Setup your PATH variable accordingly to point to all these tools, and then running `make` should build the makefile. Expect `go` to have to spend some time downloading dependencies via `git`. `make install` (with some customization of the Makefile for your %appdata% directory) can be used to copy the plugins to the Streamdeck software plugin directory.
+
+| Note: All of these plugins include compiled binaries in this repository, so you have no need to build them yourself unless you wish to modify them.
+
+| Note 2: The `binclock` and `demo` plugins even have Streamdeck installers in the `Release` directory, so all you have to do is run those `.streamDeckPlugin` files and the Streamdeck software should take it from there. 

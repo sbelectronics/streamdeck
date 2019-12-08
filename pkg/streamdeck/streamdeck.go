@@ -1,5 +1,8 @@
 /* streamdeck.go
    (c) Scott M Baker, http://www.smbaker.com/
+
+   This is a golang package for interfacing with the ElGato Streamdeck.
+   See examples in the cmd/ directory for example usage.
 */
 
 package streamdeck

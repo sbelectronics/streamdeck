@@ -1,3 +1,9 @@
+/* messages.go
+   (c) Scott M Baker, http://www.smbaker.com/
+
+   JSON message structures, sent from Plugin to Streamdeck
+*/
+
 package streamdeck
 
 const (

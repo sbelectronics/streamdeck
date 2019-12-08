@@ -1,3 +1,23 @@
+/* binclock.go
+   (c) Scott M Baker, http://www.smbaker.com/
+
+   Binary/BCD Clock implementation in an Image.
+
+   The clock displays hours, minutes, and seconds. Each decimal digit is
+   encoded as a separate binary number, commonly referred to as binary-coded
+   decimal.
+
+   For example the time 11:07:53 is represented as:
+	  Hours:    01 0001
+	  Minutes: 000 0111
+	  Seconds: 101 0011
+
+   The most significant digit for hours has only two bits because there are
+   only 24 hours in a day, and "2" requires two bits. The most sigificany
+   digit for minutes and seconds has three bits, as it may need to represent
+   a "5".
+*/
+
 package binclock
 
 import (
