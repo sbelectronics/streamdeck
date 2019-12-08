@@ -1,8 +1,6 @@
 package binclock
 
 import (
-	//"github.com/stretchr/testify/assert"
-	"image/color"
 	"image/png"
 	"os"
 	"testing"
@@ -10,9 +8,9 @@ import (
 )
 
 func TestBinClock(t *testing.T) {
-	bc := &BinClock{LitDotColor: color.RGBA{0, 0, 200, 255},
-		UnlitDotColor: color.RGBA{80, 80, 80, 255},
-		BackColor:     color.RGBA{0, 0, 0, 255}}
+	bc := &BinClock{LitDotColor: DEFAULT_LIT_COLOR,
+		UnlitDotColor: DEFAULT_UNLIT_COLOR,
+		BackColor:     DEFAULT_BACK_COLOR}
 	bc.Create()
 
 	ts := time.Now()

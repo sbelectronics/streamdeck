@@ -9,12 +9,25 @@ import (
 	"github.com/sbelectronics/streamdeck/pkg/binclock"
 	"github.com/sbelectronics/streamdeck/pkg/globaloptions"
 	"github.com/sbelectronics/streamdeck/pkg/streamdeck"
-	"image/color"
+	"github.com/sbelectronics/streamdeck/pkg/util"
 	"image/png"
 	"log"
 	"os"
 	"time"
 )
+
+type MyButtonHandler struct {
+	color int
+}
+
+// On every keyup, change the color
+func (mbh *MyButtonHandler) OnKeyUp(*streamdeck.Button)   {}
+func (mbh *MyButtonHandler) OnKeyDown(*streamdeck.Button) {}
+func (mbh *MyButtonHandler) GetDefaultSettings(button *streamdeck.Button) {
+	button.Settings["colorlit"] = binclock.DEFAULT_LIT_COLOR
+	button.Settings["colorunlit"] = binclock.DEFAULT_UNLIT_COLOR
+	button.Settings["colorback"] = binclock.DEFAULT_BACK_COLOR
+}
 
 func main() {
 	// Create the file c:\junk\binclock_plugin.log and we will append
@@ -36,7 +49,8 @@ func main() {
 		globaloptions.PluginUUID,
 		globaloptions.RegisterEvent,
 		globaloptions.Info,
-		globaloptions.Verbose)
+		globaloptions.Verbose,
+		&MyButtonHandler{})
 	if err != nil {
 		log.Fatalf("Error initializing streamdeck plugin %v", err)
 	}
@@ -46,13 +60,18 @@ func main() {
 		log.Fatalf("Error starting streamdeck plugin %v", err)
 	}
 
-	bc := &binclock.BinClock{LitDotColor: color.RGBA{0, 0, 200, 255},
-		UnlitDotColor: color.RGBA{80, 80, 80, 255},
-		BackColor:     color.RGBA{0, 0, 0, 255}}
+	bc := &binclock.BinClock{LitDotColor: binclock.DEFAULT_LIT_COLOR,
+		UnlitDotColor: binclock.DEFAULT_UNLIT_COLOR,
+		BackColor:     binclock.DEFAULT_BACK_COLOR}
 	bc.Create()
 
 	for {
-		for context, _ := range sd.Buttons {
+		for context, button := range sd.Buttons {
+			// override the colors with what might have come from the property inspector
+			bc.LitDotColor = util.StringMapGetDefault(button.Settings, "colorlit", binclock.DEFAULT_LIT_COLOR)
+			bc.UnlitDotColor = util.StringMapGetDefault(button.Settings, "colorunlit", binclock.DEFAULT_UNLIT_COLOR)
+			bc.BackColor = util.StringMapGetDefault(button.Settings, "colorback", binclock.DEFAULT_BACK_COLOR)
+
 			bc.DrawTime(time.Now())
 
 			// Encode the image into a png and set it on the StreamDeck

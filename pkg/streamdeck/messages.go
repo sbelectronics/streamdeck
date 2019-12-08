@@ -57,3 +57,8 @@ type ShowOkMessage struct {
 	Event   string `json:"event"`
 	Context string `json:"context"`
 }
+
+type GetSettingsMessage struct {
+	Event   string `json:"event"`
+	Context string `json:"context"`
+}

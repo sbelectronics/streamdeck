@@ -9,19 +9,23 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/sbelectronics/streamdeck/pkg/util"
 	"log"
 )
 
 type HandlerInterface interface {
 	OnKeyDown(button *Button)
 	OnKeyUp(button *Button)
+	GetDefaultSettings(button *Button)
 }
 
 type Button struct {
-	Context string
-	Column  int
-	Row     int
-	Handler HandlerInterface
+	Action   string
+	Context  string
+	Column   int
+	Row      int
+	Handler  HandlerInterface
+	Settings map[string]string
 }
 
 type StreamDeck struct {
@@ -38,7 +42,8 @@ type StreamDeck struct {
 
 	Buttons map[string]*Button
 
-	ws *websocket.Conn
+	ws             *websocket.Conn
+	defaultHandler HandlerInterface
 }
 
 func (sd *StreamDeck) Init(
@@ -46,27 +51,27 @@ func (sd *StreamDeck) Init(
 	pluginUUID string,
 	registerEvent string,
 	info string,
-	verbose bool) error {
+	verbose bool,
+	defaultHandler HandlerInterface) error {
 	sd.Port = port
 	sd.PluginUUID = pluginUUID
 	sd.RegisterEvent = registerEvent
 	sd.Info = info
 	sd.Verbose = verbose
 	sd.Buttons = make(map[string]*Button)
+	sd.defaultHandler = defaultHandler
 
 	err := sd.decodeInfo()
 	if err != nil {
 		return err
 	}
 
-	if sd.Verbose {
-		log.Printf("Port: %d\n", sd.Port)
-		log.Printf("PluginUUID: %s", sd.PluginUUID)
-		log.Printf("RegisterEvent: %s", sd.RegisterEvent)
-		log.Printf("Info %s", sd.Info)
-		log.Printf("Device Name %s", sd.DeviceName)
-		log.Printf("Device Id: %s", sd.DeviceId)
-	}
+	sd.Debugf("Port: %d\n", sd.Port)
+	sd.Debugf("PluginUUID: %s", sd.PluginUUID)
+	sd.Debugf("RegisterEvent: %s", sd.RegisterEvent)
+	sd.Debugf("Info %s", sd.Info)
+	sd.Debugf("Device Name %s", sd.DeviceName)
+	sd.Debugf("Device Id: %s", sd.DeviceId)
 
 	return nil
 }
@@ -84,6 +89,20 @@ func (sd *StreamDeck) Start() error {
 	}
 
 	return nil
+}
+
+func (sd *StreamDeck) Debugf(fmt string, args ...interface{}) {
+	if sd.Verbose {
+		log.Printf(fmt, args...)
+	}
+}
+
+func (sd *StreamDeck) Infof(fmt string, args ...interface{}) {
+	log.Printf(fmt, args...)
+}
+
+func (sd *StreamDeck) Errorf(fmt string, args ...interface{}) {
+	log.Printf(fmt, args...)
 }
 
 // Extract the device id from the Info JSON
@@ -122,7 +141,7 @@ func (sd *StreamDeck) onWillAppear(message []byte) {
 
 	err := json.Unmarshal([]byte(message), &willAppear)
 	if err != nil {
-		log.Printf("Failed to unmarshal WillAppear")
+		sd.Errorf("Failed to unmarshal WillAppear")
 		return
 	}
 
@@ -130,11 +149,22 @@ func (sd *StreamDeck) onWillAppear(message []byte) {
 	if ok {
 
 	} else {
-		newButton := Button{Context: willAppear.Context,
-			Column: willAppear.Payload.Coordinates.Column,
-			Row:    willAppear.Payload.Coordinates.Row}
+		newButton := Button{Action: willAppear.Action,
+			Context:  willAppear.Context,
+			Column:   willAppear.Payload.Coordinates.Column,
+			Row:      willAppear.Payload.Coordinates.Row,
+			Settings: make(map[string]string),
+			Handler:  sd.defaultHandler}
+
+		if newButton.Handler != nil {
+			newButton.Handler.GetDefaultSettings(&newButton)
+		}
+
 		sd.Buttons[willAppear.Context] = &newButton
-		log.Printf("New button %v", newButton)
+		sd.Infof("New button %v", newButton)
+
+		// Try to get settings for this button
+		sd.GetSettings(willAppear.Context)
 	}
 }
 
@@ -143,7 +173,7 @@ func (sd *StreamDeck) onKeyDown(message []byte) {
 
 	err := json.Unmarshal([]byte(message), &keyDown)
 	if err != nil {
-		log.Printf("Failed to unmarshal KeyDown")
+		sd.Errorf("Failed to unmarshal KeyDown")
 		return
 	}
 
@@ -160,7 +190,7 @@ func (sd *StreamDeck) onKeyUp(message []byte) {
 
 	err := json.Unmarshal([]byte(message), &keyUp)
 	if err != nil {
-		log.Printf("Failed to unmarshal KeyUp")
+		sd.Errorf("Failed to unmarshal KeyUp")
 		return
 	}
 
@@ -172,23 +202,139 @@ func (sd *StreamDeck) onKeyUp(message []byte) {
 	}
 }
 
+func (sd *StreamDeck) onSendToPlugin(message []byte) {
+	var f interface{}
+
+	sd.Debugf("onSendToPlugin")
+
+	err := json.Unmarshal(message, &f)
+	if err != nil {
+		sd.Errorf("Error unmarshaling SendToPlugin: %v", err)
+		return
+	}
+
+	root := f.(map[string]interface{})
+
+	context, err := util.StringFromJson(root, "context")
+	if err != nil {
+		sd.Errorf("failed to get onSendToPlugin.context: %v", err)
+		return
+	}
+
+	payload, err := util.MapInterfaceFromJson(root, "payload")
+	if err != nil {
+		sd.Errorf("failed to get onSendToPlugin.context: %v", err)
+		return
+	}
+
+	button, ok := sd.Buttons[context]
+	if !ok {
+		sd.Errorf("Failed to find SendToPlugin.button %v", context)
+		return
+	}
+
+	for k, vInterface := range payload {
+		v, ok := vInterface.(string)
+		if !ok {
+			sd.Errorf("Error converting SendtoPlugin.vInterface %v", vInterface)
+			continue
+		}
+		sd.Infof("Received PropertyInspector k=%s, v=%s", k, v)
+
+		button.Settings[k] = v
+	}
+
+	// Tell the streamdeck to store the settings persistently
+	sd.SetSettings(context, button.Settings)
+}
+
+func (sd *StreamDeck) onDidReceiveSettings(message []byte) {
+	var f interface{}
+
+	sd.Debugf("onDidReceiveSettings")
+
+	err := json.Unmarshal(message, &f)
+	if err != nil {
+		sd.Errorf("Error unmarshaling DidReceiveSettings: %v", err)
+		return
+	}
+
+	root := f.(map[string]interface{})
+
+	context, err := util.StringFromJson(root, "context")
+	if err != nil {
+		sd.Errorf("failed to get onDidReceiveSettings.context: %v", err)
+		return
+	}
+
+	payload, err := util.MapInterfaceFromJson(root, "payload")
+	if err != nil {
+		sd.Errorf("failed to get onDidReceiveSettings.payload: %v", err)
+		return
+	}
+
+	settings, err := util.MapInterfaceFromJson(payload, "settings")
+	if err != nil {
+		sd.Errorf("failed to get onDidReceiveSettings.setings: %v", err)
+		return
+	}
+
+	button, ok := sd.Buttons[context]
+	if !ok {
+		sd.Errorf("Failed to find DidReceiveSettings.button %v", context)
+		return
+	}
+
+	for k, vInterface := range settings {
+		v, ok := vInterface.(string)
+		if !ok {
+			sd.Errorf("Error converting DidReceiveSettings.vInterface %v", vInterface)
+			continue
+		}
+		sd.Infof("Received DidReceiveSettings k=%s, v=%s", k, v)
+
+		button.Settings[k] = v
+	}
+
+	// Tell the streamdeck to store the settings persistently
+	//    (did this in onPropertyInspectorDidAppear instead)
+	//sd.SendToPropertyInspector(action, context, button.Settings)
+}
+
+func (sd *StreamDeck) onPropertyInspectorDidAppear(message []byte) {
+	var pda PropertyInspectorDidAppearNotification
+
+	err := json.Unmarshal([]byte(message), &pda)
+	if err != nil {
+		sd.Errorf("Failed to unmarshal PropertyInspectorDidAppear")
+		return
+	}
+
+	button, ok := sd.Buttons[pda.Context]
+	if ok {
+		sd.SendToPropertyInspector(button.Action, button.Context, button.Settings)
+	}
+}
+
 func (sd *StreamDeck) processWebsocketIncoming() {
 	for {
 		_, message, err := sd.ws.ReadMessage()
 		if err != nil {
-			log.Printf("Read error: %v", err)
+			sd.Errorf("Read error: %v", err)
 			return
 		}
 
-		log.Printf("Receive: %s", message)
+		sd.Debugf("Websocket Receive: %s", message)
 
 		var header NotificationHeader
 		err = json.Unmarshal([]byte(message), &header)
 		if err != nil {
-			log.Printf("Error unmarshaling header %v", err)
+			sd.Errorf("Error unmarshaling header %v", err)
 			continue
 		}
-		log.Printf("event: %s", header.Event)
+
+		sd.Debugf("Websocket Event: %s", header.Event)
+
 		switch header.Event {
 		case "willAppear":
 			sd.onWillAppear(message)
@@ -197,6 +343,12 @@ func (sd *StreamDeck) processWebsocketIncoming() {
 			sd.onKeyDown(message)
 		case "keyUp":
 			sd.onKeyUp(message)
+		case "sendToPlugin":
+			sd.onSendToPlugin(message)
+		case "didReceiveSettings":
+			sd.onDidReceiveSettings(message)
+		case "propertyInspectorDidAppear":
+			sd.onPropertyInspectorDidAppear(message)
 		}
 	}
 }
@@ -212,9 +364,7 @@ func (sd *StreamDeck) SwitchProfile(profile string) error {
 		return err
 	}
 
-	if sd.Verbose {
-		log.Printf("Send JSON %s", string(b))
-	}
+	sd.Debugf("Send JSON %s", string(b))
 
 	err = sd.ws.WriteMessage(websocket.TextMessage, b)
 	if err != nil {
@@ -246,9 +396,7 @@ func (sd *StreamDeck) SetImage(context string, image []byte, mimeType string, ta
 		return err
 	}
 
-	if sd.Verbose {
-		log.Printf("Send JSON %s", string(b))
-	}
+	sd.Debugf("Send JSON %s", string(b))
 
 	err = sd.ws.WriteMessage(websocket.TextMessage, b)
 	if err != nil {
@@ -269,9 +417,7 @@ func (sd *StreamDeck) SetTitle(context string, title string, target int) error {
 		return err
 	}
 
-	if sd.Verbose {
-		log.Printf("Send JSON %s", string(b))
-	}
+	sd.Debugf("Send JSON %s", string(b))
 
 	err = sd.ws.WriteMessage(websocket.TextMessage, b)
 	if err != nil {
@@ -291,9 +437,70 @@ func (sd *StreamDeck) ShowAlert(context string) error {
 		return err
 	}
 
-	if sd.Verbose {
-		log.Printf("Send JSON %s", string(b))
+	sd.Debugf("Send JSON %s", string(b))
+
+	err = sd.ws.WriteMessage(websocket.TextMessage, b)
+	if err != nil {
+		return err
 	}
+
+	return nil
+}
+
+func (sd *StreamDeck) GetSettings(context string) error {
+	msg := GetSettingsMessage{"getSettings",
+		context,
+	}
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	sd.Debugf("Send JSON %s", string(b))
+
+	err = sd.ws.WriteMessage(websocket.TextMessage, b)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (sd *StreamDeck) SetSettings(context string, settings map[string]string) error {
+	msg := make(map[string]interface{})
+	msg["event"] = "setSettings"
+	msg["context"] = context
+	msg["payload"] = settings
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	sd.Debugf("Send JSON %s", string(b))
+
+	err = sd.ws.WriteMessage(websocket.TextMessage, b)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (sd *StreamDeck) SendToPropertyInspector(action string, context string, settings map[string]string) error {
+	msg := make(map[string]interface{})
+	msg["action"] = action
+	msg["event"] = "sendToPropertyInspector"
+	msg["context"] = context
+	msg["payload"] = settings
+
+	b, err := json.Marshal(msg)
+	if err != nil {
+		return err
+	}
+
+	sd.Debugf("Send JSON %s", string(b))
 
 	err = sd.ws.WriteMessage(websocket.TextMessage, b)
 	if err != nil {
@@ -311,9 +518,7 @@ func (sd *StreamDeck) register() error {
 		return err
 	}
 
-	if sd.Verbose {
-		log.Printf("Send JSON %s", string(b))
-	}
+	sd.Debugf("Send JSON %s", string(b))
 
 	err = sd.ws.WriteMessage(websocket.TextMessage, b)
 	if err != nil {

@@ -3,7 +3,6 @@ package binclock
 import (
 	"github.com/fogleman/gg"
 	"image"
-	"image/color"
 	"time"
 )
 
@@ -16,27 +15,30 @@ const (
 	vOffset = 8
 	hOffset = 8
 	space   = 24
+
+	DEFAULT_LIT_COLOR   = "#0000C8"
+	DEFAULT_UNLIT_COLOR = "#505050"
+	DEFAULT_BACK_COLOR  = "#000000"
 )
 
 type BinClock struct {
 	Img           *gg.Context
-	LitDotColor   color.RGBA
-	UnlitDotColor color.RGBA
-	BackColor     color.RGBA
+	LitDotColor   string
+	UnlitDotColor string
+	BackColor     string
 }
 
 func (bc *BinClock) Create() {
 	bc.Img = gg.NewContext(width, height)
-	// bc.Img = image.NewRGBA(image.Rect(0, 0, width, height)
 }
 
 func (bc *BinClock) DrawDot(x int, y int, lit bool) {
 	bc.Img.Push()
 	bc.Img.DrawCircle(float64(x), float64(height-y), float64(dotSize))
 	if lit {
-		bc.Img.SetColor(bc.LitDotColor)
+		bc.Img.SetHexColor(bc.LitDotColor)
 	} else {
-		bc.Img.SetColor(bc.UnlitDotColor)
+		bc.Img.SetHexColor(bc.UnlitDotColor)
 	}
 	bc.Img.Fill()
 	bc.Img.Pop()
@@ -58,7 +60,7 @@ func (bc *BinClock) DrawDigit(x int, y int, bits int, v int) {
 func (bc *BinClock) DrawTime(t time.Time) {
 	bc.Img.Push()
 	bc.Img.DrawRectangle(0, 0, width, height)
-	bc.Img.SetColor(bc.BackColor)
+	bc.Img.SetHexColor(bc.BackColor)
 	bc.Img.Fill()
 	bc.Img.Pop()
 

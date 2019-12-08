@@ -39,7 +39,7 @@ func TestDeviceInfo(t *testing.T) {
 		}`
 
 	sd := StreamDeck{}
-	sd.Init(0, "uuid", "reg", info, false)
+	sd.Init(0, "uuid", "reg", info, false, nil)
 
 	err := sd.decodeInfo()
 

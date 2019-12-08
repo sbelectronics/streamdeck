@@ -46,7 +46,8 @@ func (mbh *MyButtonHandler) OnKeyUp(*streamdeck.Button) {
 	}
 
 }
-func (mbh *MyButtonHandler) OnKeyDown(*streamdeck.Button) {}
+func (mbh *MyButtonHandler) OnKeyDown(*streamdeck.Button)          {}
+func (mbh *MyButtonHandler) GetDefaultSettings(*streamdeck.Button) {}
 
 func main() {
 	// Create the file c:\junk\demo_plugin.log and we will append
@@ -68,7 +69,8 @@ func main() {
 		globaloptions.PluginUUID,
 		globaloptions.RegisterEvent,
 		globaloptions.Info,
-		globaloptions.Verbose)
+		globaloptions.Verbose,
+		&MyButtonHandler{})
 	if err != nil {
 		log.Fatalf("Error initializing streamdeck plugin %v", err)
 	}
@@ -83,10 +85,10 @@ func main() {
 	for {
 		for context, button := range sd.Buttons {
 			// If there's no handler, then attach a handler
-			if button.Handler == nil {
-				log.Printf("Set handler")
-				button.Handler = &MyButtonHandler{}
-			}
+			/*			if button.Handler == nil {
+						log.Printf("Set handler")
+						button.Handler = &MyButtonHandler{}
+					}*/
 
 			// Draw a colored box and rotate it
 			thisColor := color_presets[button.Handler.(*MyButtonHandler).color]

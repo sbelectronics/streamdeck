@@ -56,3 +56,10 @@ type KeyUpNotification struct {
 	Device  string     `json:"device"`
 	Payload KeyPayload `json:"payload"`
 }
+
+type PropertyInspectorDidAppearNotification struct {
+	Action  string `json:"action"`
+	Event   string `json:"event"`
+	Context string `json:"context"`
+	Device  string `json:"device"`
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Binary Clock Property Inspector</title>
+    <link rel="stylesheet" href="sdpi.css">
+    <script src="js/common.js"></script>
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+
+    <div class="sdpi-heading">Colors</div>
+
+        <div type="color" class="sdpi-item" id="colorlit">
+                <div class="sdpi-item-label">Lit LED Color</div>
+                <input id="colorlit_input" type="color" class="sdpi-item-value" value="#0000C8" list="clrs" onchange="sendValueToPlugin(event.target.value, 'colorlit')">
+        </div>
+        <div type="color" class="sdpi-item" id="colorunlit">
+                <div class="sdpi-item-label">Unlit LED Color</div>
+                <input id="colorunlit_input" type="color" class="sdpi-item-value" value="#505050" list="clrs" onchange="sendValueToPlugin(event.target.value, 'colorunlit')">
+        </div>
+        <div type="color" class="sdpi-item" id="colorback">
+                <div class="sdpi-item-label">Background Color</div>
+                <input id="colorback_input" type="color" class="sdpi-item-value" value="#000000" list="clrs" onchange="sendValueToPlugin(event.target.value, 'colorback')">
+        </div>
+        <datalist id="clrs">
+                <option>#c80000</option>
+                <option>#ff0000</option>
+                <option>#00c800</option>
+                <option>#00ff00</option>
+                <option>#0000c8</option>
+                <option>#0000ff</option>
+                <option>#505050</option>
+                <option>#808080</option>
+                <option>#000000</option>
+        </datalist>
+
+    </div>
+    <script>
+            var pluginAction = null,
+                uuid = '';
+            if ($SD) {
+                $SD.on('connected', function (jsonObj) {
+                    uuid = jsonObj['uuid'];
+                    if (jsonObj.hasOwnProperty('actionInfo')) {
+                        pluginAction = jsonObj.actionInfo['action'];
+                    }
+                });
+                $SD.on('sendToPropertyInspector', jsn => {
+                    const pl = jsn.payload;
+                    /**
+                     *  This is an example, how you could show an error to the user
+                     */
+                    if (pl.hasOwnProperty('error')) {
+                        sdpiWrapper.innerHTML = `<div class="sdpi-item">
+                            <details class="message caution">
+                            <summary class="${pl.hasOwnProperty('info') ? 'pointer' : ''}">${pl.error}</summary>
+                                ${pl.hasOwnProperty('info') ? pl.info : ''}
+                            </details>
+                        </div>`;
+                    }
+                    if (pl.hasOwnProperty('colorlit')) {
+                        console.log('*************** colorlit', pl.colorlit);
+                        var el_colorlit_input = document.getElementById("colorlit_input");
+                        el_colorlit_input.value = pl.colorlit;
+                    }
+                    if (pl.hasOwnProperty('colorunlit')) {
+                        console.log('*************** colorunlit', pl.colorunlit);
+                        var el_colorlit_input = document.getElementById("colorunlit_input");
+                        el_colorlit_input.value = pl.colorunlit;
+                    } 
+                    if (pl.hasOwnProperty('colorback')) {
+                        console.log('*************** colorbacklit', pl.colorback);
+                        var el_colorlit_input = document.getElementById("colorback_input");
+                        el_colorlit_input.value = pl.colorback;
+                    }
+                });                
+            };
+            /** you can also use ES6 syntax like so:
+            *
+            *   if ($SD) $SD.on('connected', (jsonObj) => { uuid=jsonObj.uuid }));
+            *    
+            */
+            function sendValueToPlugin(value, param) {
+                // console.log("SENDING VALUE TO PLUGIN: ", value, uuid, pluginAction);
+                if ($SD && $SD.connection) {
+                    var payload = {};
+                    if (param) {
+                        payload[param] = value;
+                    }
+                    $SD.api.sendToPlugin(uuid, pluginAction, payload);
+                }
+            }
+        </script>    
+</body>
+</html>

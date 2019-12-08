@@ -66,7 +66,8 @@ func main() {
 		globaloptions.PluginUUID,
 		globaloptions.RegisterEvent,
 		globaloptions.Info,
-		globaloptions.Verbose)
+		globaloptions.Verbose,
+		nil)
 	if err != nil {
 		log.Fatalf("Error initializing streamdeck plugin %v", err)
 	}
