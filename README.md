@@ -11,9 +11,13 @@ This is a collection of plugins that I wrote for my Elgato Stream Deck. They are
 * demo - a playground for testing the golang-based plugin framework
 * profile_switcher - switch profiles based on active window regex match
 
+Once installed, all of the plugins will show up in the "Custom" section of the Streamdeck software.
+
 ## binclock
 
-This one is relatively straightforward, just drag it onto your button bar and it will start displaying the clock.
+A Binary Clock is a clock that displays the time in ... binary. This plugin will display a tiny binary clock inside
+a button on your Streamdeck. Why would you want to do this? It's just a gadget, or a conversation piece. Use of the
+plugin is relatively straightforward, just drag the button onto your button bar and it will start displaying the clock.
 
 Windows Download: https://github.com/sbelectronics/streamdeck/blob/master/Release/com.github.sbelectronics.streamdeck.binclock.streamDeckPlugin?raw=true
 
