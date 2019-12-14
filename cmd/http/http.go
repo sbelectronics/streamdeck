@@ -1,13 +1,11 @@
-/* demo.go
+/* http.go
    (c) Scott M Baker, http://www.smbaker.com/
 
-   NOTE: Make sure to leave the title blank when adding the button
-
-   This is a simple demo that will show a rotating square with a counter
-   that increments in the middle of it. Pressing the button will change
-   the color red -> Green -> Blue, and back to red again. If the counter
-   doesn't count, then you didn't heed the above note about making sure
-   the title is blank.
+   This is a streamdeck plugin that will perform an HTTP operation
+   against a given URL. You can specify the type of HTTP operation
+   to perform (GET, POST, PUT, PATCH, DELETE) and for operations
+   that send data (POST, PUT, etc) you can specify what data to
+   send.
 */
 
 package main

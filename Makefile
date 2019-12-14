@@ -40,6 +40,7 @@ distrib:
 	rm Release/*.streamdeckPlugin
 	DistributionTool -b -i $(BINCLOCK_DIR) -o Release || echo
 	DistributionTool -b -i $(DEMO_DIR) -o Release || echo
+	DistributionTool -b -i $(HTTP_DIR) -o Release || echo
 
 supersize:
 	convert $(BINCLOCK_DIR)/pluginIcon.png -resize 144x144 $(BINCLOCK_DIR)/pluginIcon@2x.png

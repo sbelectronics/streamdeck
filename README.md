@@ -7,6 +7,7 @@ http://www.smbaker.com/
 This is a collection of plugins that I wrote for my Elgato Stream Deck. They are as-is without any warranty.
 
 * binclock - binary (actually more BCD than binary, but that is the trend) clock
+* http - performs HTTP GET, POST, PUT, PATCH, or DELETE operations to a given URL
 * demo - a playground for testing the golang-based plugin framework
 * profile_switcher - switch profiles based on active window regex match
 
@@ -19,6 +20,14 @@ Windows Download: https://github.com/sbelectronics/streamdeck/blob/master/Releas
 ## demo
 
 This one displays a rotating box with a counter. Push the button and the color of the box will change.
+
+## http
+
+This plugin will send a HTTP request to a URL when the button is pushed and released. The can be useful for integrating with home automation software, websites, or any service that can be triggered from an HTTP request. 
+
+I use mine for integration with Autohotkey, which has a Socket library that allows it to respond to HTTP requests instead of keypresses.
+
+Windows Download: https://github.com/sbelectronics/streamdeck/blob/master/Release/com.github.sbelectronics.streamdeck.http.streamDeckPlugin?raw=true
 
 ## profile_switcher
 
