@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Binary Clock Property Inspector</title>
+    <link rel="stylesheet" href="sdpi.css">
+    <script src="js/common.js"></script>
+</head>
+
+<body>
+    <div class="sdpi-wrapper">
+
+    <div class="sdpi-heading">Request</div>
+
+        <div type="color" class="sdpi-item" id="url">
+                <div class="sdpi-item-label">URL</div>
+                <input id="url_input" class="sdpi-item-value" value="" onchange="sendValueToPlugin(event.target.value, 'url')" required >
+        </div>
+
+        <div class="sdpi-item" id="operation">
+                <div class="sdpi-item-label">Operation</div>
+                <select class="sdpi-item-value select" id="operation_select" onchange="sendValueToPlugin(event.target.value, 'operation')" >
+                   <option selected value="GET">GET</option>
+                   <option value="PUT">PUT</option>
+                   <option value="POST">POST</option>
+                   <option value="DELETE">DELETE</option>
+                </select>
+        </div>
+
+    </div>
+
+    <div class="sdpi-heading">Data (for POST/PUT/PATCH)</div>
+
+        <div type="color" class="sdpi-item" id="data">
+                <div class="sdpi-item-label">Data</div>
+                <input id="data_input" class="sdpi-item-value" value="" onchange="sendValueToPlugin(event.target.value, 'data')" >
+        </div>
+        <div type="color" class="sdpi-item" id="mimetype">
+                <div class="sdpi-item-label">Mime Type</div>
+                <input id="mimetype_input" class="sdpi-item-value" value="text/plain" onchange="sendValueToPlugin(event.target.value, 'mimetype')" >
+        </div>
+
+    </div>
+
+    <script>
+            var pluginAction = null,
+                uuid = '';
+            if ($SD) {
+                $SD.on('connected', function (jsonObj) {
+                    uuid = jsonObj['uuid'];
+                    if (jsonObj.hasOwnProperty('actionInfo')) {
+                        pluginAction = jsonObj.actionInfo['action'];
+                    }
+                });
+                $SD.on('sendToPropertyInspector', jsn => {
+                    const pl = jsn.payload;
+                    /**
+                     *  This is an example, how you could show an error to the user
+                     */
+                    if (pl.hasOwnProperty('error')) {
+                        sdpiWrapper.innerHTML = `<div class="sdpi-item">
+                            <details class="message caution">
+                            <summary class="${pl.hasOwnProperty('info') ? 'pointer' : ''}">${pl.error}</summary>
+                                ${pl.hasOwnProperty('info') ? pl.info : ''}
+                            </details>
+                        </div>`;
+                    }
+                    if (pl.hasOwnProperty('url')) {
+                        console.log('*************** url', pl.url);
+                        var el_url_input = document.getElementById("url_input");
+                        el_url_input.value = pl.url;
+                    }
+                    if (pl.hasOwnProperty('operation')) {
+                        console.log('*************** operation', pl.operation);
+                        var el_operation_select = document.getElementById("operation_select");
+                        el_operation_select.value = pl.operation;
+                    }
+                    if (pl.hasOwnProperty('data')) {
+                        console.log('*************** data', pl.data);
+                        var el_data_input = document.getElementById("data_input");
+                        el_data_input.value = pl.data;
+                    }
+                    if (pl.hasOwnProperty('mimetype')) {
+                        console.log('*************** mimetype', pl.mimetype);
+                        var el_mimetype_input = document.getElementById("mimetype_input");
+                        el_mimetype_input.value = pl.mimetype;
+                    }
+                });                
+            };
+            /** you can also use ES6 syntax like so:
+            *
+            *   if ($SD) $SD.on('connected', (jsonObj) => { uuid=jsonObj.uuid }));
+            *    
+            */
+            function sendValueToPlugin(value, param) {
+                // console.log("SENDING VALUE TO PLUGIN: ", value, uuid, pluginAction);
+                if ($SD && $SD.connection) {
+                    var payload = {};
+                    if (param) {
+                        payload[param] = value;
+                    }
+                    $SD.api.sendToPlugin(uuid, pluginAction, payload);
+                }
+            }
+        </script>    
+</body>
+</html>

@@ -2,6 +2,10 @@ package util
 
 import (
 	"fmt"
+	"log"
+	neturl "net/url"
+	"strconv"
+	"strings"
 )
 
 func StringMapGetDefault(m map[string]string, k string, def string) string {
@@ -40,4 +44,28 @@ func MapInterfaceFromJson(m map[string]interface{}, k string) (map[string]interf
 	}
 
 	return m2, nil
+}
+
+func SanitizeUrl(url string) (string, error) {
+	// Remove any leading and trailing spaces
+	url = strings.TrimSpace(url)
+
+	// See if the user put any quotes around it
+	uqs, err := strconv.Unquote(url)
+	if err == nil {
+		url = uqs
+	}
+
+	// Make sure the URL isn't horibbly misformatted
+	u, err := neturl.Parse(url)
+	if err != nil {
+		return "", fmt.Errorf("Error parsing url %v: %v", url, err)
+	}
+
+	// In case user forgets to put http:// on the front of the url
+	if u.Scheme != "http" && u.Scheme != "https" {
+		url = "http://" + url
+	}
+
+	return url, nil
 }

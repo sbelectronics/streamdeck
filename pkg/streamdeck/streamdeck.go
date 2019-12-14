@@ -23,12 +23,13 @@ type HandlerInterface interface {
 }
 
 type Button struct {
-	Action   string
-	Context  string
-	Column   int
-	Row      int
-	Handler  HandlerInterface
-	Settings map[string]string
+	Action     string
+	Context    string
+	Column     int
+	Row        int
+	Handler    HandlerInterface
+	Settings   map[string]string
+	StreamDeck *StreamDeck
 }
 
 type StreamDeck struct {
@@ -158,11 +159,12 @@ func (sd *StreamDeck) onWillAppear(message []byte) {
 
 	} else {
 		newButton := Button{Action: willAppear.Action,
-			Context:  willAppear.Context,
-			Column:   willAppear.Payload.Coordinates.Column,
-			Row:      willAppear.Payload.Coordinates.Row,
-			Settings: make(map[string]string),
-			Handler:  sd.defaultHandler}
+			Context:    willAppear.Context,
+			Column:     willAppear.Payload.Coordinates.Column,
+			Row:        willAppear.Payload.Coordinates.Row,
+			Settings:   make(map[string]string),
+			Handler:    sd.defaultHandler,
+			StreamDeck: sd}
 
 		if newButton.Handler != nil {
 			newButton.Handler.GetDefaultSettings(&newButton)
