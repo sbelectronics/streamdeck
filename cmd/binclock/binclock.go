@@ -70,6 +70,7 @@ func main() {
 		// only update if the second has changed
 		tNow := time.Now()
 		if tNow.Second() == lastSecond {
+			time.Sleep(100 * time.Millisecond)
 			continue
 		}
 		lastSecond = tNow.Second()

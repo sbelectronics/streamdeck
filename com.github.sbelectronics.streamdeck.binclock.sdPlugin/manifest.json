@@ -23,7 +23,7 @@
     "Name": "binclock", 
     "Icon": "pluginIcon", 
     "URL": "https://www.github.com/sbelectronics/streamdeck", 
-    "Version": "1.0",
+    "Version": "1.1",
     "OS": [
       {
           "Platform": "windows", 
